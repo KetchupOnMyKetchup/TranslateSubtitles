@@ -1,7 +1,4 @@
-﻿using Google.Apis.Auth.OAuth2;
-using Google.Cloud.Translation.V2;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -13,70 +10,49 @@ namespace TranslateSubtitles
         static void Main(string[] args)
         {
             Console.OutputEncoding = Encoding.UTF8;
+            GoogleTranslationApiService _translateService = new GoogleTranslationApiService();
 
             Console.WriteLine("Open subs in Notepad++ > Convert > Convert to UTF-8");
             string existingSubFilePath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\Ratatouille_BG_original.sub";
+            string type = "sub";
             // convert encoding of sub to UTF-8
 
             string fileName = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\Ratatouille_BG_translated.sub";
 
             if (File.Exists(fileName)) File.Delete(fileName);
 
-            using (StreamWriter sw = File.CreateText(fileName))
+            ReaderWriterBase sfr;
+
+            if (type == "sub") sfr = new SubFormatReaderWriter(existingSubFilePath, fileName);
+            else sfr = new SrtFormatReaderWriter(existingSubFilePath, fileName);
+
+            using (sfr)
             {
-                int count = 0;
-                StringBuilder sb = new StringBuilder();
+                List<Subtitle> batch;
+                sfr.Prepare();
 
-                using (StreamReader sr = File.OpenText(existingSubFilePath))
+                while ((batch = sfr.ReadSubtitles(10)).Count > 0)
                 {
-                    string currLine = string.Empty;
-                    sw.WriteLine(sr.ReadLine());
-                    List<string> list = new List<string>();
-
-                    while ((currLine = sr.ReadLine()) != null)
+                    StringBuilder sb = new StringBuilder();
+                    foreach (var sub in batch)
                     {
-                        if (count <= 3)
-                        {
-                            list.Add(currLine);
-                            string lineToTranslate = currLine.Remove(0, currLine.LastIndexOf('}') + 1);
-                            sb.Append(lineToTranslate + "\n");
-                            count++;
-                        }
-                        else 
-                        {
-                            string untranslated = sb.ToString().Remove(sb.Length - 1);
-                            string translatedLines = TranslateText(untranslated, "en", "bg");
-                            string[] translatedLineArr = translatedLines.Split("\n");
-
-                            for(int i = 0; i < list.Count; i++)
-                            {
-                                sw.WriteLine(list[i] + "|" + translatedLineArr[i]);
-                            }
-
-                            sb.Clear();
-                            list.Clear();
-                            count = 0;
-                        }
+                        sb.Append(sub.Text + "\n");
                     }
+                    string untranslated = sb.ToString().Remove(sb.Length - 2);
+                    string translatedLines = _translateService.TranslateText(untranslated, "en", "bg");
+                    string[] translatedLineArr = translatedLines.Split("\n");
+
+                    for (int i = 0; i < batch.Count; i++)
+                    {
+                        sfr.AppendText(batch[i], translatedLineArr[i]);
+                    }
+
+                    sfr.WriteSubtitles(batch);
                 }
             }
 
             Console.WriteLine(Environment.NewLine);
             Console.WriteLine("Success! Done.");
-        }
-
-        public static string TranslateText(string text, string targetLanguage, string sourceLanguage)
-        {
-            Console.WriteLine(Environment.NewLine);
-            Console.WriteLine(text);
-            var credential = GoogleCredential.FromFile(@"C:\Keys\BgSubtitlesAddEn-58905f3982e4.json");
-            TranslationClient client = TranslationClient.Create(credential);
-            var response = client.TranslateText(
-                text: text,
-                targetLanguage: targetLanguage,
-                sourceLanguage: sourceLanguage);
-            Console.WriteLine(response.TranslatedText);
-            return response.TranslatedText;
         }
     }
 }
