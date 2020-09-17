@@ -39,7 +39,7 @@ namespace TranslateSubtitles
                 sw.WriteLine(sub.Number);
                 sw.WriteLine(sub.Timing);
                 sw.WriteLine(sub.Text);
-                sw.WriteLine(System.Environment.NewLine);
+                sw.WriteLine();
             }
         }
 
