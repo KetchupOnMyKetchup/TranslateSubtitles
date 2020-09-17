@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "TranslateSubtitles": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "GOOGLE_APPLICATION_CREDENTIALS": "C:\\Keys\\BgSubtitlesAddEn-58905f3982e4.json"
+      }
+    }
+  }
+}
