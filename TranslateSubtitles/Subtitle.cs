@@ -5,7 +5,7 @@
     /// </summary>
     public class Subtitle
     {
-        public int Number { get; set; }
+        public string Number { get; set; }
         public string Timing { get; set; }
         public string Text { get; set; }
     }

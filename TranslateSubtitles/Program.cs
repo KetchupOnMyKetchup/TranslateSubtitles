@@ -13,11 +13,14 @@ namespace TranslateSubtitles
             GoogleTranslationApiService _translateService = new GoogleTranslationApiService();
 
             Console.WriteLine("Open subs in Notepad++ > Convert > Convert to UTF-8");
-            string existingSubFilePath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\Ratatouille_BG_original.sub";
-            string type = "sub";
+            //string existingSubFilePath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\Ratatouille_BG_original.sub";
+            string existingSubFilePath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\Frozen-Bulgarian.srt";
+            //string type = "sub";
+            string type = "srt";
             // convert encoding of sub to UTF-8
 
-            string fileName = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\Ratatouille_BG_translated.sub";
+            //string fileName = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\Ratatouille_BG_translated.sub";
+            string fileName = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\Frozen-Bulgarian-translated.srt";
 
             if (File.Exists(fileName)) File.Delete(fileName);
 
@@ -31,16 +34,16 @@ namespace TranslateSubtitles
                 List<Subtitle> batch;
                 sfr.Prepare();
 
-                while ((batch = sfr.ReadSubtitles(10)).Count > 0)
+                while ((batch = sfr.ReadSubtitles(2)).Count > 0)
                 {
                     StringBuilder sb = new StringBuilder();
                     foreach (var sub in batch)
                     {
-                        sb.Append(sub.Text + "\n");
+                        sb.Append(sub.Text + '@');
                     }
-                    string untranslated = sb.ToString().Remove(sb.Length - 2);
+                    string untranslated = sb.ToString().Remove(sb.Length - 1);
                     string translatedLines = _translateService.TranslateText(untranslated, "en", "bg");
-                    string[] translatedLineArr = translatedLines.Split("\n");
+                    string[] translatedLineArr = translatedLines.Split("@");
 
                     for (int i = 0; i < batch.Count; i++)
                     {

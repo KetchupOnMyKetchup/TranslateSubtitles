@@ -15,8 +15,10 @@ namespace TranslateSubtitles
             WriteToFilePath = writeToFilePath;
         }
 
+        /// <summary>
+        /// Handle first subtitle that sets up FPS (sub) or font color/size (srt)
+        /// </summary>
         public abstract void Prepare();
-
 
         public abstract Subtitle ReadSubtitle();
 

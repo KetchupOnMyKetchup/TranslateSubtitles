@@ -9,20 +9,25 @@ namespace TranslateSubtitles
 
         public override void Prepare()
         {
-            using FileStream fs = new FileStream(WriteToFilePath, FileMode.Append, FileAccess.Write);
-            using StreamWriter sw = new StreamWriter(fs);
-            sw.WriteLine(sr.ReadLine());
+            return;
         }
 
         public override Subtitle ReadSubtitle()
         {
-            string currLine = sr.ReadLine();
-            if (currLine == null)
-                return null;
+            Subtitle subtitle = new Subtitle
+            {
+                Number = sr.ReadLine(),
+                Timing = sr.ReadLine()
+            };
+            string curr;
+            while ((curr = sr.ReadLine()) != null && curr.Length > 0)
+            {
+                subtitle.Text += curr + '\n'; // change to list later and join them
+            }
 
-            int index = currLine.LastIndexOf('}') + 1;
+            if (subtitle.Text != null) subtitle.Text = subtitle.Text.Remove(subtitle.Text.Length - 1);
 
-            return new Subtitle { Timing = currLine.Substring(index), Text = currLine.Substring(0, index) };
+            return subtitle;
         }
 
         public override void WriteSubtitles(List<Subtitle> subs)
@@ -31,13 +36,16 @@ namespace TranslateSubtitles
             using StreamWriter sw = new StreamWriter(fs);
             foreach (var sub in subs)
             {
-                sw.WriteLine(sub.Number + sub.Text);
+                sw.WriteLine(sub.Number);
+                sw.WriteLine(sub.Timing);
+                sw.WriteLine(sub.Text);
+                sw.WriteLine(System.Environment.NewLine);
             }
         }
 
         public override void AppendText(Subtitle sub, string text)
         {
-            sub.Text += "|" + text;
+            sub.Text = sub.Text.TrimEnd() + "\n" + text.TrimStart();
         }
     }
 }
