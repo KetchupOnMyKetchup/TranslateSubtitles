@@ -45,6 +45,7 @@ namespace TranslateSubtitles
 
         public override void AppendText(Subtitle sub, string text)
         {
+            if (sub.Text == null || text == null) return;
             sub.Text = sub.Text.TrimEnd() + "\n" + text.TrimStart();
         }
     }
